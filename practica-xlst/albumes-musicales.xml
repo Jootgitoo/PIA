@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="albumes-musicales.xsl"?>
+<albumes>
+    <album>
+        <titulo>Ameri</titulo>
+        <artista>Duki</artista>
+        <anio>2024</anio>
+        <imagen>imagenes/ameri.png</imagen>
+        <canciones>
+            <cancion>Nueva Era</cancion>
+            <cancion>Trato De Estar Bien</cancion>
+        </canciones>
+    </album>
+
+    <album>
+        <titulo>Delaossa</titulo>
+        <artista>La Madrugá</artista>
+        <anio>2025</anio>
+        <imagen>imagenes/la-madruga.png</imagen>
+        <canciones>
+            <cancion>La Barra Del Bar</cancion>
+            <cancion>Vulnerable</cancion>
+        </canciones>
+    </album>
+
+    <album>
+        <titulo>Cruz Cafuné</titulo>
+        <artista>Me Muevo Con Dios</artista>
+        <anio>2023</anio>
+        <imagen>me-muevo-con-dios.png</imagen>
+        <canciones>
+            <cancion>Dios #1</cancion>
+            <cancion>Sangre y Fe</cancion>
+        </canciones>
+    </album>
+
+</albumes>
