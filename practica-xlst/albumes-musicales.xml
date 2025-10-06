@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="albumes-musicales.xsl"?>
+<?xml-stylesheet type="text/xsl" href="album-segun-fecha.xsl"?>
 <albumes>
     <album>
         <titulo>Ameri</titulo>
@@ -27,7 +27,7 @@
         <titulo>Cruz Cafuné</titulo>
         <artista>Me Muevo Con Dios</artista>
         <anio>2023</anio>
-        <imagen>me-muevo-con-dios.png</imagen>
+        <imagen>imagenes/me-muevo-con-dios.png</imagen>
         <canciones>
             <cancion>Dios #1</cancion>
             <cancion>Sangre y Fe</cancion>
