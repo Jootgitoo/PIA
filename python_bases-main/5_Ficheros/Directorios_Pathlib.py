@@ -4,7 +4,8 @@ from pathlib import Path, PureWindowsPath
 Este modo no nos asegura que funcione en distintos SSOO
 archivo = open('../recursos/otro_archivo.txt', 'r')
 print(archivo.read())
-archivo.close()"""
+archivo.close()
+"""
 
 carpeta = Path('../recursos')
 # Cualquier sistema que abra esto lo podrá leer
