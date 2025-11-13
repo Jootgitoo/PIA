@@ -6,6 +6,8 @@ class Habitat:
         self.capacidad = capacidad
         self.lista_animales_residentes = [] 
         
+    def __init__():
+        pass
         
     def agregar_animal(self, animal):
         if len(self.lista_animales_residentes) < self.capacidad:
@@ -15,20 +17,6 @@ class Habitat:
             return "No se pudo añadir al hábitat"
         
         
-    @nombre.deleter
-    def nombre(self):
-        del self.nombre
-        
-    @tipo.deleter
-    def tipo(self):
-        del self.tipo
-        
-    @capacidad.deleter
-    def capacidad(self):
-        del self.capacidad
-        
-    @lista_animales_residentes.deleter
-    def lista_animales_residentes(self):
-        del self.lista_animales_residentes
+
         
     
