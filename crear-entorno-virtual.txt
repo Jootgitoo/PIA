@@ -1,0 +1,2 @@
+PS C:\ia-bigData\PIA\python_rec_voz_yfinance_pywhatkit-main> python -m venv *nombre_entorno*_venv
+PS C:\ia-bigData\PIA\python_rec_voz_yfinance_pywhatkit-main> .\rec_voz_venv\bin\activate
