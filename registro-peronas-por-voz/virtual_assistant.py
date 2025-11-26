@@ -35,6 +35,7 @@ def audio_to_text():
         except:
             print('Ups, algo ha salido mal')
             return 'Esperando'
+
         
 def talk(msg):
     newVoiceRate = 180
@@ -112,10 +113,12 @@ def requests():
         elif 'crear nuevo usuario' in request:
             
             talk('Dime el nombre del usuario')
-            user_name = audio_to_text().tolower()
+            user_name = audio_to_text().lower()
+            talk('Nombre guardado correctamente')
             
             talk('Dime el dni del usuario')
-            user_dni = audio_to_text().tolower()
+            user_dni = audio_to_text().lower()
+            talk('DNI guardado correctamente')
             
             usuario = {
                 'nombre': user_name,
@@ -123,6 +126,10 @@ def requests():
             }
             guardar_usuario(usuario)
             talk(f'Usuario {user_name} guardado correctamente')
+            
+        elif 'salir' in request:
+            talk('Hasta luego. Que tengas un buen día.')
+            stop = True
 
 def guardar_usuario(usuario):
     archivo = "usuarios.json"
