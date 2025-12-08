@@ -9,6 +9,7 @@ import json
 import face_recognition
 from pathlib import Path
 import face_recognition as fr
+import time
     
 def saludo():
     """
@@ -26,9 +27,11 @@ def saludo():
     capturar_foto_inicial()
     
 
+
+
 def capturar_foto_inicial():
     """
-    Te toma una foto inicial para comprobar tu identidad.
+    Abre la cámara, muestra una ventana durante 2 segundos y toma la foto automáticamente.
     """
     
     cam = cv2.VideoCapture(0)
@@ -37,15 +40,37 @@ def capturar_foto_inicial():
         print("Error: No se pudo acceder a la cámara.")
         return None
 
-    ret, frame = cam.read()
-    cam.release()
+    # Guardamos el tiempo en el que empieza el proceso
+    tiempo_inicio = time.time()
+    
+    frame = None
+    ret = False
 
-    if not ret:
-        print("Error: No se pudo capturar la imagen.")
+    # Mantenemos el bucle abierto solo mientras hayan pasado menos de 2 segundos
+    while (time.time() - tiempo_inicio) < 5:
+        ret, frame = cam.read()
+        
+        if not ret:
+            print("Error: No se pudo leer la imagen de la cámara.")
+            break
+
+        # Mostramos la ventana con lo que ve la cámara
+        cv2.imshow("Ajustate - La foto se tomara en 2 segundos", frame)
+        
+        # Necesario para que la ventana de OpenCV se refresque y muestre la imagen
+        cv2.waitKey(1)
+
+    # Una vez pasados los 5 segundos, cerramos cámara y ventana
+    cam.release()
+    cv2.destroyAllWindows()
+
+    if not ret or frame is None:
+        print("Error: No se pudo capturar la imagen final.")
         return None
 
     actual_user_image = "fotos/usuario_actual.jpg"
-    # Guardamos la imagen capturada
+    
+    # Guardamos la imagen (el último frame capturado antes de cerrar)
     cv2.imwrite(actual_user_image, frame)
 
     talk(f"Foto inicial capturada")
@@ -88,19 +113,28 @@ def comprobar_identidad(imagen_usuario, json_usuarios):
     print("Comparación control --> usuarios realizada correctamente.")
 
     # Interpretar resultados
+    usuario_encontrado = False
+    
     for i in range(1, len(resultados)):
-        if resultados[i]['misma_cara'][0]:  # compare_faces devuelve un booleano dentro de un array
-            nombre = usuarios[i - 1]["nombre"]
+        if resultados[i]['misma_cara'][0]:
+            nombre = usuarios[i-1]['nombre']
             talk(f"Usuario reconocido: Bienvenido {nombre}")
             request()
-        else:
-            talk("El usuario no ha sido reconocido. ¿Desea registrarse?")
+            
+            usuario_encontrado = True
+            break
+    
+    if not usuario_encontrado:
+        talk("El usuario no ha sido reconocido. ¿Desea registrarse?")
+        request_usr = audio_to_text().lower()
+        
+        while not "si" in request_usr:
+            talk("No te he entendido. ¿Deseas registrarte? Por favor, responde sí o no.")
             request_usr = audio_to_text().lower()
-            if "si" in request_usr:
-                registrar_usuario()
-            else:
-                talk("El programa se va a detener.")
-                salir()
+        
+        if "si" in request_usr:
+            registrar_usuario()
+        
 
             
 def cargar_imagenes(path_list):
