@@ -44,7 +44,7 @@ def capturar_foto_inicial():
     frame = None
     ret = False
 
-    # Mantenemos el bucle abierto solo mientras hayan pasado menos de 4 segundos
+    # Mantenemos el bucle abierto hasta 4 segundos
     while (time.time() - tiempo_inicio) < 4:
         ret, frame = cam.read()
         
