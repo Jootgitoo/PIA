@@ -10,6 +10,7 @@ import face_recognition
 from pathlib import Path
 import face_recognition as fr
 import time
+from usuario import Usuario
     
 def saludo():
     """
@@ -86,11 +87,14 @@ def comprobar_identidad(imagen_usuario, json_usuarios):
     lista_rutas = [imagen_usuario]
     print("Ruta de la imagen del usuario a identificar añadida.")
 
-    usuarios = data["usuarios"]
+    
+    # Convertir diccionarios a objetos Usuario
+    lista_usuarios_obj = [Usuario.from_dict(u) for u in data["usuarios"]]
+    
     # Añadir todas las fotos registradas
-    for user in usuarios:
-        if "foto" in user:
-            lista_rutas.append(user["foto"])
+    for user in lista_usuarios_obj:
+        if user.foto:
+            lista_rutas.append(user.foto)
     print("Rutas de las imágenes de la base de datos añadidas.")
 
     # 2. Cargar imágenes con TUS MÉTODOS
@@ -116,7 +120,7 @@ def comprobar_identidad(imagen_usuario, json_usuarios):
     
     for i in range(1, len(resultados)):
         if resultados[i]['misma_cara'][0]:
-            nombre = usuarios[i-1]['nombre']
+            nombre = lista_usuarios_obj[i-1].nombre
             talk(f"Usuario reconocido: Bienvenido {nombre}")
             request()
             
@@ -193,11 +197,7 @@ def registrar_usuario():
     talk('Vamos a hacerte una foto')
     ruta_foto = tomar_foto_registro(user_name)
     
-    usuario = {
-        'nombre': user_name,
-        'dni': user_dni,
-        'foto': ruta_foto
-    }
+    usuario = Usuario(user_name, user_dni, ruta_foto)
     guardar_usuario(usuario)
     talk(f'Usuario {user_name} guardado correctamente')
     saludo()
@@ -246,7 +246,7 @@ def guardar_usuario(usuario):
         data = {"usuarios": []}
 
     # Agregar el nuevo usuario
-    data["usuarios"].append(usuario)
+    data["usuarios"].append(usuario.to_dict())
 
     # Guardar todo en el JSON
     with open(archivo, "w", encoding="utf-8") as f:
