@@ -33,30 +33,36 @@ def capturar_foto_inicial():
     Abre la cámara, muestra una ventana durante 4 segundos y toma la foto automáticamente.
     """
     
+    #Accedemos a la cámara
     cam = cv2.VideoCapture(0)
 
     if not cam.isOpened():
         print("Error: No se pudo acceder a la cámara.")
         return None
 
-    # Guardamos el tiempo en el que empieza el proceso
+    #Guardamos el tiempo en el que empieza el proceso para calcular los 4 segundos
     tiempo_inicio = time.time()
     
+    #Imagen capturada
     frame = None
+
+    #Controlar si se ha capturado la imagen
     ret = False
 
-    # Mantenemos el bucle abierto hasta 4 segundos
+    #Mantenemos el bucle abierto hasta 4 segundos
     while (time.time() - tiempo_inicio) < 4:
+
+        #Leemos la imagen de la cámara
         ret, frame = cam.read()
         
         if not ret:
             print("Error: No se pudo leer la imagen de la cámara.")
             break
 
-        # Mostramos la ventana con lo que ve la cámara
+        #Mostramos la imagen en una ventana
         cv2.imshow("Vista cámara", frame)
         
-        # Necesario para que la ventana de OpenCV se refresque y muestre la imagen
+        #Necesario para que la ventana de OpenCV se refresque y muestre la imagen
         cv2.waitKey(1)
 
     # Una vez pasados los 4 segundos, cerramos cámara y ventana
@@ -69,37 +75,44 @@ def capturar_foto_inicial():
 
     actual_user_image = "fotos/usuario_actual.jpg"
     
-    # Guardamos la imagen (el último frame capturado antes de cerrar)
+    # Guardamos la imagen
     cv2.imwrite(actual_user_image, frame)
 
     talk(f"Foto inicial capturada")
     comprobar_identidad(actual_user_image, "bbdd/usuarios.json")
 
 
-def comprobar_identidad(imagen_usuario, json_usuarios):
+def comprobar_identidad(user_image, users_json):
+    """
+    Comparamos la imagen del usuario con las de la base de datos.
+        - Si está registrado accede al programa
+        - Si no está registrado se le pide que se registre
+    
+    :param user_image: Ruta de la imagen del usuario a identificar.
+    :param users_json: Ruta del archivo JSON con los datos de los usuarios.
+    """
 
-    # Carga el Json con usuarios
-    with open(json_usuarios, "r", encoding="utf-8") as file:
+    #Carga el Json
+    with open(users_json, "r", encoding="utf-8") as file:
         data = json.load(file)
     print("Datos de usuarios cargados correctamente.")
 
-    # Rutas de las imagenes que se van a utilizar (la primera es la del usuario a identificar y el resto las de la base de datos)
-    lista_rutas = [imagen_usuario]
+    #Rutas de las imagenes que se van a utilizar
+    list_path_images = [user_image]
     print("Ruta de la imagen del usuario a identificar añadida.")
 
+    #Convertimos el JSON en una lista de objetos Usuario
+    list_obj_users = [Usuario(u.get("nombre"), u.get("dni"), u.get("foto")) for u in data["usuarios"]]
     
-    # Convertir diccionarios a objetos Usuario
-    lista_usuarios_obj = [Usuario.from_dict(u) for u in data["usuarios"]]
-    
-    # Añadir todas las fotos registradas
-    for user in lista_usuarios_obj:
-        if user.foto:
-            lista_rutas.append(user.foto)
+    #Añadir todas las fotos registradas
+    for user in list_obj_users:
+        if user.get_foto():
+            list_path_images.append(user.get_foto())
     print("Rutas de las imágenes de la base de datos añadidas.")
 
-    # 2. Cargar imágenes con TUS MÉTODOS
-    fotos = cargar_imagenes(lista_rutas)
+    fotos = cargar_imagenes(list_path_images)
     print("Imágenes cargadas correctamente.")
+    
     fotos = asignar_perfil_color(fotos)
     print("Perfil de color asignado correctamente.")
 
@@ -108,19 +121,19 @@ def comprobar_identidad(imagen_usuario, json_usuarios):
     except Exception as e:
         print("Error al obtener codificaciones de las caras:", e)
         talk("No se ha detectado una cara válida en alguna de las imágenes. Por favor, inténtalo de nuevo.")
-        return  # Salir de la comprobación para evitar seguir con codificaciones inválidas
+        return
     print("Codificaciones obtenidas correctamente.")
 
-    # Comparar foto de control (primer índice) contra las demás
+    #Comparamos la foto del usuario con las de la base de datos
     resultados = compare_all_with_control(codificaciones)
     print("Comparación control --> usuarios realizada correctamente.")
 
-    # Interpretar resultados
+    #Buscamos si el usuario está registrado
     usuario_encontrado = False
     
     for i in range(1, len(resultados)):
         if resultados[i]['misma_cara'][0]:
-            nombre = lista_usuarios_obj[i-1].nombre
+            nombre = list_obj_users[i-1].nombre
             talk(f"Usuario reconocido: Bienvenido {nombre}")
             request()
             
@@ -138,10 +151,14 @@ def comprobar_identidad(imagen_usuario, json_usuarios):
         if "vale" in request_usr:
             registrar_usuario()
 
-            
-# Cargar imagenes
+
 def cargar_imagenes(path_list):
-    # La primera será una foto de control, el resto de pruebas
+    """
+    Obtenemos imágenes con las rutas proporcionadas.
+    
+    :param path_list: Lista de rutas de las imágenes a cargar.
+    """
+
     fotos = []
     for path in path_list:
         fotos.append(fr.load_image_file(path))
@@ -151,13 +168,20 @@ def asignar_perfil_color(fotos_list):
     """
     Asigna el perfil de color RGB a las imágenes cargadas.
     
-    :param fotos_list: Descripción
+    :param fotos_list: Lista de imágenes a las que se les asignará el perfil de color.
     """
+
     for i in range(len(fotos_list)):
         fotos_list[i] = cv2.cvtColor(fotos_list[i], cv2.COLOR_BGR2RGB)
     return fotos_list 
 
 def localizar_cara(fotos_list):
+    """
+    Localiza la cara en las imágenes proporcionadas.
+    
+    :param fotos_list: Lista de imágenes en las que se localizará la cara.
+    """
+
     locations = []
     for i in fotos_list:
         locations.append(fr.face_locations(i)[0]) #puede detectar más caras... nos quedamos con la primera
@@ -165,6 +189,12 @@ def localizar_cara(fotos_list):
 
 
 def get_cod_faces(fotos_list):
+    """
+    Obtenemos las codificaciones de las caras en las imágenes proporcionadas.
+    
+    :param fotos_list: Lista de imágenes en las que se localizará la cara.
+    """
+    
     cod_faces = []
     for i in fotos_list:
         cod_faces.append(fr.face_encodings(i)[0])
@@ -172,6 +202,12 @@ def get_cod_faces(fotos_list):
 
 
 def compare_all_with_control(cara_cod_list):
+    """
+    Comparamos la codificación de la cara con la codificación de control.
+    
+    :param cara_cod_list: Lista de codificaciones de caras a comparar.
+    """
+    
     results = []
     for i,fc in enumerate(cara_cod_list):
         if i > 0:
@@ -185,7 +221,12 @@ def compare_all_with_control(cara_cod_list):
 
     return results
 
+
 def registrar_usuario():
+    """
+    Registra un nuevo usuario por voz.
+    """
+    
     talk('Dime el nombre del usuario')
     user_name = audio_to_text().lower()
     talk('Nombre guardado correctamente')
@@ -204,7 +245,7 @@ def registrar_usuario():
 
 def tomar_foto_registro(nombre):
     """
-    Toma una foto para el registro del usuario.
+    Toma una foto
     """
     cam = cv2.VideoCapture(0)
     
@@ -236,6 +277,10 @@ def tomar_foto_registro(nombre):
         return ""
 
 def guardar_usuario(usuario):
+    """
+    Guarda un usuario en el archivo JSON.
+    """
+
     archivo = "bbdd/usuarios.json"
 
     # Si el archivo existe, lo cargamos para no perder los datos
@@ -246,7 +291,7 @@ def guardar_usuario(usuario):
         data = {"usuarios": []}
 
     # Agregar el nuevo usuario
-    data["usuarios"].append(usuario.to_dict())
+    data["usuarios"].append(usuario.get_user())
 
     # Guardar todo en el JSON
     with open(archivo, "w", encoding="utf-8") as f:
@@ -254,11 +299,18 @@ def guardar_usuario(usuario):
        
         
 def salir():
+    """
+    Sale del programa.
+    """
     talk('Hasta luego. Que tengas un buen día.')
     exit()
 
 
 def request():
+    """
+    Cosas que puede hacer el asistente escuchando al usuario
+    """
+
     talk('¿En qué puedo ayudarte?')
     
     stop = False
@@ -279,6 +331,9 @@ def request():
             
     
 def say_day():
+    """
+    Dice el día de la semana.
+    """
     day = datetime.date.today()
     weekday = {
         0: 'Lunes',
@@ -293,6 +348,9 @@ def say_day():
 
 
 def say_hour():
+    """
+    Dice la hora actual.
+    """
     hour = datetime.datetime.now()
     talk(f'En este momento son las {hour.hour} horas y {hour.minute} minutos')
 

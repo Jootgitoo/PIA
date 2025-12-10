@@ -5,17 +5,18 @@ class Usuario:
         self.dni = dni
         self.foto = foto
 
-    def to_dict(self):
+    def get_nombre(self):
+        return self.nombre
+
+    def get_dni(self):
+        return self.dni
+
+    def get_foto(self):
+        return self.foto
+
+    def get_user(self):
         return {
             "nombre": self.nombre,
             "dni": self.dni,
             "foto": self.foto
         }
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            nombre=data.get("nombre"),
-            dni=data.get("dni"),
-            foto=data.get("foto")
-        )
