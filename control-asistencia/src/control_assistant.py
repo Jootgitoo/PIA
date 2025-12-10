@@ -27,11 +27,9 @@ def saludo():
     capturar_foto_inicial()
     
 
-
-
 def capturar_foto_inicial():
     """
-    Abre la cámara, muestra una ventana durante 2 segundos y toma la foto automáticamente.
+    Abre la cámara, muestra una ventana durante 4 segundos y toma la foto automáticamente.
     """
     
     cam = cv2.VideoCapture(0)
@@ -46,8 +44,8 @@ def capturar_foto_inicial():
     frame = None
     ret = False
 
-    # Mantenemos el bucle abierto solo mientras hayan pasado menos de 2 segundos
-    while (time.time() - tiempo_inicio) < 5:
+    # Mantenemos el bucle abierto solo mientras hayan pasado menos de 4 segundos
+    while (time.time() - tiempo_inicio) < 4:
         ret, frame = cam.read()
         
         if not ret:
@@ -55,12 +53,12 @@ def capturar_foto_inicial():
             break
 
         # Mostramos la ventana con lo que ve la cámara
-        cv2.imshow("Ajustate - La foto se tomara en 2 segundos", frame)
+        cv2.imshow("Vista cámara", frame)
         
         # Necesario para que la ventana de OpenCV se refresque y muestre la imagen
         cv2.waitKey(1)
 
-    # Una vez pasados los 5 segundos, cerramos cámara y ventana
+    # Una vez pasados los 4 segundos, cerramos cámara y ventana
     cam.release()
     cv2.destroyAllWindows()
 
@@ -91,7 +89,8 @@ def comprobar_identidad(imagen_usuario, json_usuarios):
     usuarios = data["usuarios"]
     # Añadir todas las fotos registradas
     for user in usuarios:
-        lista_rutas.append(user["foto"])
+        if "foto" in user:
+            lista_rutas.append(user["foto"])
     print("Rutas de las imágenes de la base de datos añadidas.")
 
     # 2. Cargar imágenes con TUS MÉTODOS
@@ -128,22 +127,16 @@ def comprobar_identidad(imagen_usuario, json_usuarios):
         talk("El usuario no ha sido reconocido. ¿Desea registrarse?")
         request_usr = audio_to_text().lower()
         
-        while not "si" in request_usr:
+        while not "vale" in request_usr:
             talk("No te he entendido. ¿Deseas registrarte? Por favor, responde sí o no.")
             request_usr = audio_to_text().lower()
         
-        if "si" in request_usr:
+        if "vale" in request_usr:
             registrar_usuario()
-        
 
             
+# Cargar imagenes
 def cargar_imagenes(path_list):
-    """
-    Lista de rutas de imágenes a cargar.
-    Las reconoce y carga
-    
-    :param path_list: Descripción
-    """
     # La primera será una foto de control, el resto de pruebas
     fotos = []
     for path in path_list:
@@ -160,7 +153,6 @@ def asignar_perfil_color(fotos_list):
         fotos_list[i] = cv2.cvtColor(fotos_list[i], cv2.COLOR_BGR2RGB)
     return fotos_list 
 
-# top, right, botton, left
 def localizar_cara(fotos_list):
     locations = []
     for i in fotos_list:
@@ -170,11 +162,8 @@ def localizar_cara(fotos_list):
 
 def get_cod_faces(fotos_list):
     cod_faces = []
-    for idx, img in enumerate(fotos_list):
-        enc = fr.face_encodings(img)
-        if not enc:
-            raise ValueError(f"No se detectó ninguna cara en la imagen índice {idx}")
-        cod_faces.append(enc[0])
+    for i in fotos_list:
+        cod_faces.append(fr.face_encodings(i)[0])
     return cod_faces
 
 
@@ -201,29 +190,67 @@ def registrar_usuario():
     user_dni = audio_to_text().lower()
     talk('DNI guardado correctamente')
     
+    talk('Vamos a hacerte una foto')
+    ruta_foto = tomar_foto_registro(user_name)
+    
     usuario = {
         'nombre': user_name,
-        'dni': user_dni
+        'dni': user_dni,
+        'foto': ruta_foto
     }
     guardar_usuario(usuario)
     talk(f'Usuario {user_name} guardado correctamente')
+    saludo()
+
+def tomar_foto_registro(nombre):
+    """
+    Toma una foto para el registro del usuario.
+    """
+    cam = cv2.VideoCapture(0)
     
+    if not cam.isOpened():
+        print("Error: No se pudo acceder a la cámara.")
+        return ""
+
+    talk("Mantén la mirada en la cámara durante 3 segundos.")
+    
+    start_time = time.time()
+    frame = None
+    
+    while (time.time() - start_time) < 3:
+        ret, frame = cam.read()
+        if not ret:
+            break
+        cv2.imshow("Registro Usuario", frame)
+        cv2.waitKey(1)
+        
+    cam.release()
+    cv2.destroyAllWindows()
+    
+    if frame is not None:
+        ruta = f"fotos/{nombre}.jpg"
+        cv2.imwrite(ruta, frame)
+        return ruta
+    else:
+        talk("No se pudo tomar la foto.")
+        return ""
+
 def guardar_usuario(usuario):
     archivo = "bbdd/usuarios.json"
 
     # Si el archivo existe, lo cargamos para no perder los datos
-    lista_usuarios = []
-    
     if os.path.exists(archivo):
         with open(archivo, "r", encoding="utf-8") as f:
-            lista_usuarios = json.load(f)
+            data = json.load(f)
+    else:
+        data = {"usuarios": []}
 
     # Agregar el nuevo usuario
-    lista_usuarios.append(usuario)
+    data["usuarios"].append(usuario)
 
     # Guardar todo en el JSON
     with open(archivo, "w", encoding="utf-8") as f:
-        json.dump(lista_usuarios, f, indent=4, ensure_ascii=False)
+        json.dump(data, f, indent=4, ensure_ascii=False)
        
         
 def salir():

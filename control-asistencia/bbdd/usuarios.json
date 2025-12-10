@@ -1,3 +1,9 @@
 {
-  "usuarios": []
+    "usuarios": [
+        {
+            "nombre": "jorge",
+            "dni": "uno a",
+            "foto": "fotos/jorge.jpg"
+        }
+    ]
 }
