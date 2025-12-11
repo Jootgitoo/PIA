@@ -184,7 +184,7 @@ def localizar_cara(fotos_list):
 
     locations = []
     for i in fotos_list:
-        locations.append(fr.face_locations(i)[0]) #puede detectar más caras... nos quedamos con la primera
+        locations.append(fr.face_locations(i)[0]) #detectar caras
     return locations
 
 
