@@ -241,7 +241,7 @@ def registrar_usuario():
     usuario = Usuario(user_name, user_dni, ruta_foto)
     guardar_usuario(usuario)
     talk(f'Usuario {user_name} guardado correctamente')
-    saludo()
+    
 
 def tomar_foto_registro(nombre):
     """

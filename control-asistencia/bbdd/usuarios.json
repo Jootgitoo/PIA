@@ -4,6 +4,11 @@
             "nombre": "jorge",
             "dni": "uno a",
             "foto": "fotos/jorge.jpg"
+        },
+        {
+            "nombre": "ramón",
+            "dni": "568972 m",
+            "foto": "fotos/ramón.jpg"
         }
     ]
 }
