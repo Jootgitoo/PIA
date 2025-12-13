@@ -1,0 +1,48 @@
+{
+    "animales": [
+        {
+            "nombre": "Simba",
+            "especie": "Le\u00f3n",
+            "edad": 5,
+            "nivel_hambre": 20,
+            "habitat_asignado": "Selva"
+        },
+        {
+            "nombre": "Nala",
+            "especie": "Le\u00f3n",
+            "edad": 4,
+            "nivel_hambre": 10,
+            "habitat_asignado": null
+        },
+        {
+            "nombre": "Dinosaurio",
+            "especie": "T-Rex",
+            "edad": 90,
+            "nivel_hambre": 0,
+            "habitat_asignado": null
+        }
+    ],
+    "habitats": [
+        {
+            "nombre": "Selva",
+            "tipo": "Terrestre",
+            "capacidad": 1,
+            "animales": [
+                {
+                    "nombre": "Simba",
+                    "especie": "Le\u00f3n",
+                    "edad": 5,
+                    "nivel_hambre": 20,
+                    "habitat_asignado": "Selva"
+                }
+            ]
+        },
+        {
+            "nombre": "Jungla",
+            "tipo": "Jungla",
+            "capacidad": 100,
+            "animales": []
+        }
+    ],
+    "cuidadores": []
+}

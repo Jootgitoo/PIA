@@ -1,0 +1,6 @@
+Tipo,Nombre,Detalle1,Detalle2
+Habitat,Selva,Terrestre,Capacidad: 1
+Habitat,Jungla,Jungla,Capacidad: 100
+Animal,Simba,León,Hambre: 20
+Animal,Nala,León,Hambre: 10
+Animal,Dinosaurio,T-Rex,Hambre: 0
