@@ -39,9 +39,6 @@ plt.show()
 #Agrupamos por tipo de dia y calculamos la media de cada uno (frio, templado y caluroso)
 datos_agrupados = df.groupby('tipo_dia')['temperatura'].mean()
 
-print("Media de temperaturas por tipo de dia")
-print(datos_agrupados)
-
 #datos_agrupados.index --> caluroso, frío, templado
 #datos_agrupados.values --> media de caluroso, frío, templado
 plt.bar(datos_agrupados.index, datos_agrupados.values)
